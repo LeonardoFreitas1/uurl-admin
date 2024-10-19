@@ -20,6 +20,10 @@
 # Go workspace file
 go.work
 go.work.sum
+/tmp
 
 # env file
 .env
+
+# tool versions
+.tool-versions
