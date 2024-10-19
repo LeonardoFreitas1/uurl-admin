@@ -16,29 +16,30 @@ import (
 var database = config.GetDB()
 
 func main() {
-	http.HandleFunc("/languageTag/", languageTagHandler)
+	http.HandleFunc("/language/", languageTagHandler)
 
 	fmt.Println("Server running at :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func languageTagHandler(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Path[len("/languageTag/"):])
-	if err != nil && r.Method != http.MethodPost {
-		http.Error(w, "Invalid item ID", http.StatusBadRequest)
-		return
-	}
-
-	switch r.Method {
-	case http.MethodGet:
-		if id == 0 {
+	if r.Method == http.MethodGet {
+		idStr := r.URL.Path[len("/language/"):]
+		if idStr == "" || idStr == "/language" {
 			getAllLanguageTags(w, r)
-		} else {
-			getLanguageTagByID(w, r, id)
+			return
 		}
-	case http.MethodPost:
+
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			http.Error(w, "Invalid item ID", http.StatusBadRequest)
+			return
+		}
+
+		getLanguageTagByID(w, r, id)
+	} else if r.Method == http.MethodPost {
 		postLanguageTag(w, r)
-	default:
+	} else {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
@@ -48,6 +49,15 @@ func getAllLanguageTags(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Failed to get language tags", http.StatusInternalServerError)
 		return
+	}
+
+	for i, tag := range languageTags {
+		variants, err := db.GetVariantsByLanguageTagID(database, tag.ID)
+		if err != nil {
+			http.Error(w, "Failed to get variants for language tag", http.StatusInternalServerError)
+			return
+		}
+		languageTags[i].Variants = variants
 	}
 
 	json.NewEncoder(w).Encode(languageTags)
