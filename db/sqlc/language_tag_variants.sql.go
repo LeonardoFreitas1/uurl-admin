@@ -11,6 +11,17 @@ import (
 	"time"
 )
 
+const getVariantCount = `-- name: GetVariantCount :one
+SELECT count(id) FROM language_tag_variants WHERE language_tag_id = $1
+`
+
+func (q *Queries) GetVariantCount(ctx context.Context, languageTagID sql.NullInt32) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getVariantCount, languageTagID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getVariantsByLanguageTagID = `-- name: GetVariantsByLanguageTagID :many
 SELECT id, created_at, updated_at, variant_tag, description, is_iana_language_sub_tag, instances_on_domains_count
 FROM language_tag_variants WHERE language_tag_id = $1
@@ -81,6 +92,29 @@ func (q *Queries) InsertVariant(ctx context.Context, arg InsertVariantParams) er
 		arg.InstancesOnDomainsCount,
 		arg.CreatedAt,
 		arg.UpdatedAt,
+	)
+	return err
+}
+
+const updateVariant = `-- name: UpdateVariant :exec
+UPDATE language_tag_variants set language_tag_id = $2, variant_tag = $3, description = $4, is_iana_language_sub_tag = $5 where id = $1
+`
+
+type UpdateVariantParams struct {
+	ID                   int32          `json:"id"`
+	LanguageTagID        sql.NullInt32  `json:"language_tag_id"`
+	VariantTag           string         `json:"variant_tag"`
+	Description          sql.NullString `json:"description"`
+	IsIanaLanguageSubTag bool           `json:"is_iana_language_sub_tag"`
+}
+
+func (q *Queries) UpdateVariant(ctx context.Context, arg UpdateVariantParams) error {
+	_, err := q.db.ExecContext(ctx, updateVariant,
+		arg.ID,
+		arg.LanguageTagID,
+		arg.VariantTag,
+		arg.Description,
+		arg.IsIanaLanguageSubTag,
 	)
 	return err
 }

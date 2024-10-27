@@ -1,11 +1,15 @@
 basePath: /
 definitions:
-  handlers.CustomString:
+  handlers.LanguageTagBody:
     properties:
-      value:
+      iso_code_1:
+        type: string
+      iso_code_2:
+        type: string
+      name:
         type: string
     type: object
-  handlers.LanguageTagWithVariants:
+  handlers.LanguageTagGetAllResponse:
     properties:
       id:
         type: integer
@@ -15,20 +19,18 @@ definitions:
         type: string
       name:
         type: string
-      variants:
-        items:
-          $ref: '#/definitions/handlers.VariantWithCustomString'
-        type: array
-    type: object
-  handlers.VariantWithCustomString:
-    properties:
-      description:
-        $ref: '#/definitions/handlers.CustomString'
-      instancesOnDomainsCount:
+      variants_count:
         type: integer
-      isIANALanguageSubTag:
-        type: boolean
-      variantTag:
+    type: object
+  handlers.LanguageTagResponse:
+    properties:
+      id:
+        type: integer
+      iso_code_1:
+        type: string
+      iso_code_2:
+        type: string
+      name:
         type: string
     type: object
 host: localhost:8080
@@ -48,7 +50,7 @@ paths:
           description: List of Language Tags with variants
           schema:
             items:
-              $ref: '#/definitions/handlers.LanguageTagWithVariants'
+              $ref: '#/definitions/handlers.LanguageTagGetAllResponse'
             type: array
         "500":
           description: Failed to get language tags
@@ -67,14 +69,14 @@ paths:
         name: languageTag
         required: true
         schema:
-          $ref: '#/definitions/handlers.LanguageTagWithVariants'
+          $ref: '#/definitions/handlers.LanguageTagBody'
       produces:
       - application/json
       responses:
         "201":
           description: Created Language Tag with variants
           schema:
-            $ref: '#/definitions/handlers.LanguageTagWithVariants'
+            $ref: '#/definitions/handlers.LanguageTagResponse'
         "400":
           description: Invalid input
           schema:
@@ -101,7 +103,7 @@ paths:
         "200":
           description: Language Tag with variants
           schema:
-            $ref: '#/definitions/handlers.LanguageTagWithVariants'
+            $ref: '#/definitions/handlers.LanguageTagResponse'
         "404":
           description: Language tag not found
           schema:
