@@ -6,26 +6,41 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+
+	"github.com/LeonardoFreitas1/uurl-admin/db/sqlc"
+	"github.com/joho/godotenv"
 )
 
-func GetDB() *sql.DB {
+var (
+	db      *sql.DB
+	Queries *sqlc.Queries
+)
 
+func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Warning: Error loading .env file, proceeding with system environment variables")
+	}
+
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbHost := os.Getenv("DB_HOST")
+	dbName := os.Getenv("DB_NAME")
+
+	if dbUser == "" || dbPassword == "" || dbHost == "" || dbName == "" {
+		log.Fatal("Database configuration variables are missing")
 	}
 
 	connStr := fmt.Sprintf(
 		"postgres://%s:%s@%s/%s?sslmode=disable",
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_NAME"),
+		dbUser,
+		dbPassword,
+		dbHost,
+		dbName,
 	)
 
-	db, err := sql.Open("postgres", connStr)
+	db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("Failed to connect to the database:", err)
 	}
@@ -34,5 +49,13 @@ func GetDB() *sql.DB {
 		log.Fatal("Failed to ping the database:", err)
 	}
 
+	Queries = sqlc.New(db)
+}
+
+func GetDB() *sql.DB {
 	return db
+}
+
+func GetQueries() *sqlc.Queries {
+	return Queries
 }
