@@ -12,9 +12,11 @@ import (
 type Querier interface {
 	GetAllLanguageTags(ctx context.Context) ([]LanguageTag, error)
 	GetLanguageTagByID(ctx context.Context, id int32) (LanguageTag, error)
+	GetVariantCount(ctx context.Context, languageTagID sql.NullInt32) (int64, error)
 	GetVariantsByLanguageTagID(ctx context.Context, languageTagID sql.NullInt32) ([]GetVariantsByLanguageTagIDRow, error)
 	InsertLanguageTag(ctx context.Context, arg InsertLanguageTagParams) (int32, error)
 	InsertVariant(ctx context.Context, arg InsertVariantParams) error
+	UpdateVariant(ctx context.Context, arg UpdateVariantParams) error
 }
 
 var _ Querier = (*Queries)(nil)

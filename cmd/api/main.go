@@ -16,9 +16,14 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
+	http.HandleFunc("/language", handlers.LanguageTagHandler)
 	http.HandleFunc("/language/", handlers.LanguageTagHandler)
 	http.Handle("/swagger/", httpSwagger.WrapHandler)
 
 	fmt.Println("Server running at :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: http.DefaultServeMux,
+	}
+	log.Fatal(server.ListenAndServe())
 }

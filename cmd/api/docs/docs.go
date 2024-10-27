@@ -31,7 +31,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/handlers.LanguageTagWithVariants"
+                                "$ref": "#/definitions/handlers.LanguageTagGetAllResponse"
                             }
                         }
                     },
@@ -62,7 +62,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LanguageTagWithVariants"
+                            "$ref": "#/definitions/handlers.LanguageTagBody"
                         }
                     }
                 ],
@@ -70,7 +70,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created Language Tag with variants",
                         "schema": {
-                            "$ref": "#/definitions/handlers.LanguageTagWithVariants"
+                            "$ref": "#/definitions/handlers.LanguageTagResponse"
                         }
                     },
                     "400": {
@@ -111,7 +111,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Language Tag with variants",
                         "schema": {
-                            "$ref": "#/definitions/handlers.LanguageTagWithVariants"
+                            "$ref": "#/definitions/handlers.LanguageTagResponse"
                         }
                     },
                     "404": {
@@ -131,15 +131,21 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.CustomString": {
+        "handlers.LanguageTagBody": {
             "type": "object",
             "properties": {
-                "value": {
+                "iso_code_1": {
+                    "type": "string"
+                },
+                "iso_code_2": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
         },
-        "handlers.LanguageTagWithVariants": {
+        "handlers.LanguageTagGetAllResponse": {
             "type": "object",
             "properties": {
                 "id": {
@@ -154,27 +160,24 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "variants": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handlers.VariantWithCustomString"
-                    }
+                "variants_count": {
+                    "type": "integer"
                 }
             }
         },
-        "handlers.VariantWithCustomString": {
+        "handlers.LanguageTagResponse": {
             "type": "object",
             "properties": {
-                "description": {
-                    "$ref": "#/definitions/handlers.CustomString"
-                },
-                "instancesOnDomainsCount": {
+                "id": {
                     "type": "integer"
                 },
-                "isIANALanguageSubTag": {
-                    "type": "boolean"
+                "iso_code_1": {
+                    "type": "string"
                 },
-                "variantTag": {
+                "iso_code_2": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
