@@ -3,7 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,13 +14,35 @@ import (
 var database = config.GetDB()
 var queries = sqlc.New(database)
 
-type LanguageTagWithVariants struct {
-	sqlc.LanguageTag
-	Variants []sqlc.GetVariantsByLanguageTagIDRow `json:"variants"`
+type CustomString struct {
+	Value string `json:"value"`
 }
 
+type VariantWithCustomString struct {
+	VariantTag              string       `json:"variantTag"`
+	Description             CustomString `json:"description"`
+	IsIANALanguageSubTag    bool         `json:"isIANALanguageSubTag"`
+	InstancesOnDomainsCount int          `json:"instancesOnDomainsCount"`
+}
+
+type LanguageTagWithVariants struct {
+	sqlc.LanguageTag
+	Variants []VariantWithCustomString `json:"variants"`
+}
+
+// LanguageTagHandler godoc
+// @Summary Manage Language Tags
+// @Description Endpoint to handle operations on language tags by method
+// @Tags LanguageTags
+// @Accept json
+// @Produce json
+// @Param id path int false "Language Tag ID"
+// @Success 200 {object} LanguageTagWithVariants "Language Tag with variants"
+// @Failure 400 {string} string "Invalid item ID"
+// @Failure 405 {string} string "Method not allowed"
+// @Router /language/{id} [get]
+// @Router /language [post]
 func LanguageTagHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Print("here:")
 	switch r.Method {
 	case http.MethodGet:
 		idStr := r.URL.Path[len("/language/"):]
@@ -44,6 +65,14 @@ func LanguageTagHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// getAllLanguageTags godoc
+// @Summary Get all language tags
+// @Description Retrieve all language tags with their associated variants
+// @Tags LanguageTags
+// @Produce json
+// @Success 200 {array} LanguageTagWithVariants "List of Language Tags with variants"
+// @Failure 500 {string} string "Failed to get language tags"
+// @Router /language [get]
 func getAllLanguageTags(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -65,15 +94,36 @@ func getAllLanguageTags(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to get variants for language tag", http.StatusInternalServerError)
 			return
 		}
+
+		var variantList []VariantWithCustomString
+		for _, variant := range variants {
+			variantList = append(variantList, VariantWithCustomString{
+				VariantTag:              variant.VariantTag,
+				Description:             CustomString{Value: variant.Description.String},
+				IsIANALanguageSubTag:    variant.IsIanaLanguageSubTag,
+				InstancesOnDomainsCount: int(variant.InstancesOnDomainsCount),
+			})
+		}
+
 		result = append(result, LanguageTagWithVariants{
 			LanguageTag: tag,
-			Variants:    variants,
+			Variants:    variantList,
 		})
 	}
 
 	json.NewEncoder(w).Encode(result)
 }
 
+// getLanguageTagByID godoc
+// @Summary Get language tag by ID
+// @Description Retrieve a specific language tag and its variants by ID
+// @Tags LanguageTags
+// @Produce json
+// @Param id path int true "Language Tag ID"
+// @Success 200 {object} LanguageTagWithVariants "Language Tag with variants"
+// @Failure 404 {string} string "Language tag not found"
+// @Failure 500 {string} string "Failed to get variants"
+// @Router /language/{id} [get]
 func getLanguageTagByID(w http.ResponseWriter, r *http.Request, id int32) {
 	ctx := r.Context()
 
@@ -94,14 +144,35 @@ func getLanguageTagByID(w http.ResponseWriter, r *http.Request, id int32) {
 		return
 	}
 
+	var variantList []VariantWithCustomString
+	for _, variant := range variants {
+		variantList = append(variantList, VariantWithCustomString{
+			VariantTag:              variant.VariantTag,
+			Description:             CustomString{Value: variant.Description.String},
+			IsIANALanguageSubTag:    variant.IsIanaLanguageSubTag,
+			InstancesOnDomainsCount: int(variant.InstancesOnDomainsCount),
+		})
+	}
+
 	result := LanguageTagWithVariants{
 		LanguageTag: tag,
-		Variants:    variants,
+		Variants:    variantList,
 	}
 
 	json.NewEncoder(w).Encode(result)
 }
 
+// postLanguageTag godoc
+// @Summary Create a new language tag
+// @Description Insert a new language tag and its associated variants
+// @Tags LanguageTags
+// @Accept json
+// @Produce json
+// @Param languageTag body LanguageTagWithVariants true "Language Tag with Variants"
+// @Success 201 {object} LanguageTagWithVariants "Created Language Tag with variants"
+// @Failure 400 {string} string "Invalid input"
+// @Failure 500 {string} string "Failed to insert language tag or variants"
+// @Router /language [post]
 func postLanguageTag(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -133,8 +204,6 @@ func postLanguageTag(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to insert language tag", http.StatusInternalServerError)
 		return
 	}
-
-	println(tagID)
 
 	tagIDNull := sql.NullInt32{
 		Int32: int32(tagID),
@@ -175,9 +244,19 @@ func postLanguageTag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var variantList []VariantWithCustomString
+	for _, variant := range variants {
+		variantList = append(variantList, VariantWithCustomString{
+			VariantTag:              variant.VariantTag,
+			Description:             CustomString{Value: variant.Description.String},
+			IsIANALanguageSubTag:    variant.IsIanaLanguageSubTag,
+			InstancesOnDomainsCount: int(variant.InstancesOnDomainsCount),
+		})
+	}
+
 	result := LanguageTagWithVariants{
 		LanguageTag: tag,
-		Variants:    variants,
+		Variants:    variantList,
 	}
 
 	w.WriteHeader(http.StatusCreated)
