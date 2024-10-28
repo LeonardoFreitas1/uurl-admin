@@ -82,6 +82,166 @@
                 }
             }
         },
+        "/language-variant": {
+            "get": {
+                "description": "Get a list of language tag variants with pagination",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "language-variant"
+                ],
+                "summary": "Get paginated language tag variants",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Language Tag ID",
+                        "name": "languageTagId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit of items per page",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset for pagination",
+                        "name": "page_token",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.PaginatedVariantsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid languageTagId or page_token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database query error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new language tag variant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "language-variant"
+                ],
+                "summary": "Create a new language tag variant",
+                "parameters": [
+                    {
+                        "description": "Language Tag Variant",
+                        "name": "variant",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LanguageTagVariantsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LanguageTagVariantsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database query error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/language-variant/{id}": {
+            "put": {
+                "description": "Update an existing language tag variant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "language-variant"
+                ],
+                "summary": "Update an existing language tag variant",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Variant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Language Tag Variant",
+                        "name": "variant",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LanguageTagVariantsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LanguageTagVariantsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Variant not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database query error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/language/{id}": {
             "get": {
                 "description": "Retrieve a specific language tag and its variants by ID",
@@ -173,6 +333,57 @@
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.LanguageTagVariantsRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "is_iana_language_sub_tag": {
+                    "type": "boolean"
+                },
+                "language_tag_id": {
+                    "type": "integer"
+                },
+                "variant_tag": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.LanguageTagVariantsResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_iana_language_sub_tag": {
+                    "type": "boolean"
+                },
+                "language_tag_id": {
+                    "type": "integer"
+                },
+                "variant_tag": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.PaginatedVariantsResponse": {
+            "type": "object",
+            "properties": {
+                "next_page_token": {
+                    "type": "string"
+                },
+                "variants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.LanguageTagVariantsResponse"
+                    }
                 }
             }
         }

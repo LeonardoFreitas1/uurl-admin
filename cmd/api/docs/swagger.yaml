@@ -33,6 +33,39 @@ definitions:
       name:
         type: string
     type: object
+  handlers.LanguageTagVariantsRequest:
+    properties:
+      description:
+        type: string
+      is_iana_language_sub_tag:
+        type: boolean
+      language_tag_id:
+        type: integer
+      variant_tag:
+        type: string
+    type: object
+  handlers.LanguageTagVariantsResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      is_iana_language_sub_tag:
+        type: boolean
+      language_tag_id:
+        type: integer
+      variant_tag:
+        type: string
+    type: object
+  handlers.PaginatedVariantsResponse:
+    properties:
+      next_page_token:
+        type: string
+      variants:
+        items:
+          $ref: '#/definitions/handlers.LanguageTagVariantsResponse'
+        type: array
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -88,6 +121,112 @@ paths:
       summary: Create a new language tag
       tags:
       - LanguageTags
+  /language-variant:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of language tag variants with pagination
+      parameters:
+      - description: Language Tag ID
+        in: query
+        name: languageTagId
+        type: integer
+      - default: 10
+        description: Limit of items per page
+        in: query
+        name: page_size
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        name: page_token
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.PaginatedVariantsResponse'
+        "400":
+          description: Invalid languageTagId or page_token
+          schema:
+            type: string
+        "500":
+          description: Database query error
+          schema:
+            type: string
+      summary: Get paginated language tag variants
+      tags:
+      - language-variant
+    post:
+      consumes:
+      - application/json
+      description: Create a new language tag variant
+      parameters:
+      - description: Language Tag Variant
+        in: body
+        name: variant
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LanguageTagVariantsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.LanguageTagVariantsResponse'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "500":
+          description: Database query error
+          schema:
+            type: string
+      summary: Create a new language tag variant
+      tags:
+      - language-variant
+  /language-variant/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update an existing language tag variant
+      parameters:
+      - description: Variant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Language Tag Variant
+        in: body
+        name: variant
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LanguageTagVariantsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LanguageTagVariantsResponse'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "404":
+          description: Variant not found
+          schema:
+            type: string
+        "500":
+          description: Database query error
+          schema:
+            type: string
+      summary: Update an existing language tag variant
+      tags:
+      - language-variant
   /language/{id}:
     get:
       description: Retrieve a specific language tag and its variants by ID

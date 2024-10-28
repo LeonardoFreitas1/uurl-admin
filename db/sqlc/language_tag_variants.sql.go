@@ -11,6 +11,94 @@ import (
 	"time"
 )
 
+const getPaginatedVariantsWithFilter = `-- name: GetPaginatedVariantsWithFilter :many
+SELECT id, language_tag_id, created_at, updated_at, variant_tag, description, is_iana_language_sub_tag, instances_on_domains_count FROM language_tag_variants
+WHERE language_tag_id = $3::integer
+ORDER BY id
+LIMIT $1 OFFSET $2
+`
+
+type GetPaginatedVariantsWithFilterParams struct {
+	Limit         int32 `json:"limit"`
+	Offset        int32 `json:"offset"`
+	LanguageTagID int32 `json:"language_tag_id"`
+}
+
+func (q *Queries) GetPaginatedVariantsWithFilter(ctx context.Context, arg GetPaginatedVariantsWithFilterParams) ([]LanguageTagVariant, error) {
+	rows, err := q.db.QueryContext(ctx, getPaginatedVariantsWithFilter, arg.Limit, arg.Offset, arg.LanguageTagID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []LanguageTagVariant{}
+	for rows.Next() {
+		var i LanguageTagVariant
+		if err := rows.Scan(
+			&i.ID,
+			&i.LanguageTagID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.VariantTag,
+			&i.Description,
+			&i.IsIanaLanguageSubTag,
+			&i.InstancesOnDomainsCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPaginatedVariantsWithoutFilter = `-- name: GetPaginatedVariantsWithoutFilter :many
+SELECT id, language_tag_id, created_at, updated_at, variant_tag, description, is_iana_language_sub_tag, instances_on_domains_count FROM language_tag_variants
+ORDER BY id
+LIMIT $1 OFFSET $2
+`
+
+type GetPaginatedVariantsWithoutFilterParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) GetPaginatedVariantsWithoutFilter(ctx context.Context, arg GetPaginatedVariantsWithoutFilterParams) ([]LanguageTagVariant, error) {
+	rows, err := q.db.QueryContext(ctx, getPaginatedVariantsWithoutFilter, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []LanguageTagVariant{}
+	for rows.Next() {
+		var i LanguageTagVariant
+		if err := rows.Scan(
+			&i.ID,
+			&i.LanguageTagID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.VariantTag,
+			&i.Description,
+			&i.IsIanaLanguageSubTag,
+			&i.InstancesOnDomainsCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getVariantCount = `-- name: GetVariantCount :one
 SELECT count(id) FROM language_tag_variants WHERE language_tag_id = $1
 `
@@ -97,7 +185,7 @@ func (q *Queries) InsertVariant(ctx context.Context, arg InsertVariantParams) er
 }
 
 const updateVariant = `-- name: UpdateVariant :exec
-UPDATE language_tag_variants set language_tag_id = $2, variant_tag = $3, description = $4, is_iana_language_sub_tag = $5 where id = $1
+UPDATE language_tag_variants set language_tag_id = $2, variant_tag = $3, description = $4, is_iana_language_sub_tag = $5, updated_at = $6 where id = $1
 `
 
 type UpdateVariantParams struct {
@@ -106,6 +194,7 @@ type UpdateVariantParams struct {
 	VariantTag           string         `json:"variant_tag"`
 	Description          sql.NullString `json:"description"`
 	IsIanaLanguageSubTag bool           `json:"is_iana_language_sub_tag"`
+	UpdatedAt            time.Time      `json:"updated_at"`
 }
 
 func (q *Queries) UpdateVariant(ctx context.Context, arg UpdateVariantParams) error {
@@ -115,6 +204,7 @@ func (q *Queries) UpdateVariant(ctx context.Context, arg UpdateVariantParams) er
 		arg.VariantTag,
 		arg.Description,
 		arg.IsIanaLanguageSubTag,
+		arg.UpdatedAt,
 	)
 	return err
 }
