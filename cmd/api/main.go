@@ -18,6 +18,10 @@ import (
 func main() {
 	http.HandleFunc("/language", handlers.LanguageTagHandler)
 	http.HandleFunc("/language/", handlers.LanguageTagHandler)
+
+	http.HandleFunc("/language-variant", handlers.LanguageTagVariantHandler)
+	http.HandleFunc("/language-variant/", handlers.LanguageTagVariantHandler)
+
 	http.Handle("/swagger/", httpSwagger.WrapHandler)
 
 	fmt.Println("Server running at :8080")
