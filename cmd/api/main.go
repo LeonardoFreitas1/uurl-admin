@@ -10,11 +10,11 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-// @title UURL Admin API
-// @version 1.0
-// @description API documentation for UURL Admin service.
-// @host localhost:8080
-// @BasePath /
+// @title			UURL Admin API
+// @version		1.0
+// @description	API documentation for UURL Admin service.
+// @host			localhost:8080
+// @BasePath		/
 func main() {
 	http.HandleFunc("/language", handlers.LanguageTagHandler)
 	http.HandleFunc("/language/", handlers.LanguageTagHandler)
@@ -22,7 +22,10 @@ func main() {
 	http.HandleFunc("/language-variant", handlers.LanguageTagVariantHandler)
 	http.HandleFunc("/language-variant/", handlers.LanguageTagVariantHandler)
 
-	http.Handle("/swagger/", httpSwagger.WrapHandler)
+	http.HandleFunc("/country", handlers.CountryHandler)
+	http.HandleFunc("/country/", handlers.CountryHandler)
+
+	http.Handle("/swagger-ui/", httpSwagger.WrapHandler)
 
 	fmt.Println("Server running at :8080")
 	server := &http.Server{

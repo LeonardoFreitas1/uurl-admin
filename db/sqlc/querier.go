@@ -10,12 +10,15 @@ import (
 )
 
 type Querier interface {
+	GetAllCountries(ctx context.Context) ([]GetAllCountriesRow, error)
 	GetAllLanguageTags(ctx context.Context) ([]LanguageTag, error)
+	GetCountryById(ctx context.Context, id int32) (GetCountryByIdRow, error)
 	GetLanguageTagByID(ctx context.Context, id int32) (LanguageTag, error)
 	GetPaginatedVariantsWithFilter(ctx context.Context, arg GetPaginatedVariantsWithFilterParams) ([]LanguageTagVariant, error)
 	GetPaginatedVariantsWithoutFilter(ctx context.Context, arg GetPaginatedVariantsWithoutFilterParams) ([]LanguageTagVariant, error)
 	GetVariantCount(ctx context.Context, languageTagID sql.NullInt32) (int64, error)
 	GetVariantsByLanguageTagID(ctx context.Context, languageTagID sql.NullInt32) ([]GetVariantsByLanguageTagIDRow, error)
+	InsertCountry(ctx context.Context, arg InsertCountryParams) (int32, error)
 	InsertLanguageTag(ctx context.Context, arg InsertLanguageTagParams) (int32, error)
 	InsertVariant(ctx context.Context, arg InsertVariantParams) error
 	UpdateVariant(ctx context.Context, arg UpdateVariantParams) error

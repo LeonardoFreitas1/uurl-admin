@@ -9,6 +9,17 @@ import (
 	"time"
 )
 
+type Country struct {
+	ID                int32          `json:"id"`
+	Name              string         `json:"name"`
+	OfficialStateName sql.NullString `json:"official_state_name"`
+	Tld               string         `json:"tld"`
+	Iso31662A1        string         `json:"iso3166_2_a1"`
+	Iso31662A3        string         `json:"iso3166_2_a3"`
+	CreatedAt         time.Time      `json:"created_at"`
+	UpdatedAt         time.Time      `json:"updated_at"`
+}
+
 type LanguageTag struct {
 	ID       int32  `json:"id"`
 	Name     string `json:"name"`

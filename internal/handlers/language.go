@@ -36,17 +36,18 @@ type LanguageTagBody struct {
 }
 
 // LanguageTagHandler godoc
-// @Summary Manage Language Tags
-// @Description Endpoint to handle operations on language tags by method
-// @Tags LanguageTags
-// @Accept json
-// @Produce json
-// @Param id path int false "Language Tag ID"
-// @Success 200 {object} LanguageTagResponse "Language Tag with variants"
-// @Failure 400 {string} string "Invalid item ID"
-// @Failure 405 {string} string "Method not allowed"
-// @Router /language/{id} [get]
-// @Router /language [post]
+//
+//	@Summary		Manage Language Tags
+//	@Description	Endpoint to handle operations on language tags by method
+//	@Tags			Language tags
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int					false	"Language Tag ID"
+//	@Success		200	{object}	LanguageTagResponse	"Language Tag with variants"
+//	@Failure		400	{string}	string				"Invalid item ID"
+//	@Failure		405	{string}	string				"Method not allowed"
+//	@Router			/language/{id} [get]
+//	@Router			/language [post]
 func LanguageTagHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -74,13 +75,14 @@ func LanguageTagHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // getAllLanguageTags godoc
-// @Summary Get all language tags
-// @Description Retrieve all language tags with their associated variants
-// @Tags LanguageTags
-// @Produce json
-// @Success 200 {array} LanguageTagGetAllResponse "List of Language Tags with variants"
-// @Failure 500 {string} string "Failed to get language tags"
-// @Router /language [get]
+//
+//	@Summary		Get all language tags
+//	@Description	Retrieve all language tags with their associated variants
+//	@Tags			Language tags
+//	@Produce		json
+//	@Success		200	{array}		LanguageTagGetAllResponse	"List of Language Tags with variants"
+//	@Failure		500	{string}	string						"Failed to get language tags"
+//	@Router			/language [get]
 func getAllLanguageTags(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -119,15 +121,16 @@ func getAllLanguageTags(w http.ResponseWriter, r *http.Request) {
 }
 
 // getLanguageTagByID godoc
-// @Summary Get language tag by ID
-// @Description Retrieve a specific language tag and its variants by ID
-// @Tags LanguageTags
-// @Produce json
-// @Param id path int true "Language Tag ID"
-// @Success 200 {object} LanguageTagResponse "Language Tag with variants"
-// @Failure 404 {string} string "Language tag not found"
-// @Failure 500 {string} string "Failed to get variants"
-// @Router /language/{id} [get]
+//
+//	@Summary		Get language tag by ID
+//	@Description	Retrieve a specific language tag and its variants by ID
+//	@Tags			Language tags
+//	@Produce		json
+//	@Param			id	path		int					true	"Language Tag ID"
+//	@Success		200	{object}	LanguageTagResponse	"Language Tag with variants"
+//	@Failure		404	{string}	string				"Language tag not found"
+//	@Failure		500	{string}	string				"Failed to get variants"
+//	@Router			/language/{id} [get]
 func getLanguageTagByID(w http.ResponseWriter, r *http.Request, id int32) {
 	ctx := r.Context()
 
@@ -151,16 +154,17 @@ func getLanguageTagByID(w http.ResponseWriter, r *http.Request, id int32) {
 }
 
 // postLanguageTag godoc
-// @Summary Create a new language tag
-// @Description Insert a new language tag and its associated variants
-// @Tags LanguageTags
-// @Accept json
-// @Produce json
-// @Param languageTag body LanguageTagBody true "Language Tag with Variants"
-// @Success 201 {object} LanguageTagResponse "Created Language Tag with variants"
-// @Failure 400 {string} string "Invalid input"
-// @Failure 500 {string} string "Failed to insert language tag or variants"
-// @Router /language [post]
+//
+//	@Summary		Create a new language tag
+//	@Description	Insert a new language tag and its associated variants
+//	@Tags			Language tags
+//	@Accept			json
+//	@Produce		json
+//	@Param			languageTag	body		LanguageTagBody		true	"Language Tag with Variants"
+//	@Success		201			{object}	LanguageTagResponse	"Created Language Tag with variants"
+//	@Failure		400			{string}	string				"Invalid input"
+//	@Failure		500			{string}	string				"Failed to insert language tag or variants"
+//	@Router			/language [post]
 func postLanguageTag(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
