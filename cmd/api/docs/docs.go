@@ -289,7 +289,10 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LanguageTagVariantsRequest"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handlers.LanguageTagVariantsRequest"
+                            }
                         }
                     }
                 ],
@@ -297,7 +300,10 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/handlers.LanguageTagVariantsResponse"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handlers.LanguageTagVariantsResponse"
+                            }
                         }
                     },
                     "400": {

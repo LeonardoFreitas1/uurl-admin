@@ -158,38 +158,41 @@ func getPaginatedVariants(w http.ResponseWriter, r *http.Request) {
 //	@tags			Language variants
 //	@Accept			json
 //	@Produce		json
-//	@Param			variant	body		LanguageTagVariantsRequest	true	"Language Tag Variant"
-//	@Success		201		{object}	LanguageTagVariantsResponse
+//	@Param			variant	body		[]LanguageTagVariantsRequest	true	"Language Tag Variant"
+//	@Success		201		{object}	[]LanguageTagVariantsResponse
 //	@Failure		400		{string}	string	"Invalid request payload"
 //	@Failure		500		{string}	string	"Database query error"
 //	@Router			/language-variant [post]
 func postLanguageTagVariant(w http.ResponseWriter, r *http.Request) {
-	var req LanguageTagVariantsRequest
+	var req []LanguageTagVariantsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	arg := sqlc.InsertVariantParams{
-		LanguageID:  sql.NullInt32{Int32: req.LanguageTagID, Valid: true},
-		CountryID:   sql.NullInt32{Int32: req.CountryID, Valid: true},
-		VariantTag:  req.VariantTag,
-		Description: sql.NullString{String: req.Description, Valid: true},
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
+	var response []LanguageTagVariantsResponse
+	for _, v := range req {
+		arg := sqlc.InsertVariantParams{
+			LanguageID:  sql.NullInt32{Int32: v.LanguageTagID, Valid: false},
+			CountryID:   sql.NullInt32{Int32: v.CountryID, Valid: false},
+			VariantTag:  v.VariantTag,
+			Description: sql.NullString{String: v.Description, Valid: true},
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+		}
 
-	err := queries.InsertVariant(r.Context(), arg)
-	if err != nil {
-		println(err.Error())
-		http.Error(w, "Database query error", http.StatusInternalServerError)
-		return
-	}
+		err := queries.InsertVariant(r.Context(), arg)
+		if err != nil {
+			println(err.Error())
+			http.Error(w, "Database query error", http.StatusInternalServerError)
+			return
+		}
 
-	response := LanguageTagVariantsResponse{
-		LanguageTagID: req.LanguageTagID,
-		VariantTag:    req.VariantTag,
-		Description:   req.Description,
+		response = append(response, LanguageTagVariantsResponse{
+			LanguageTagID: v.LanguageTagID,
+			VariantTag:    v.VariantTag,
+			Description:   v.Description,
+		})
 	}
 
 	w.Header().Set("Content-Type", "application/json")

@@ -278,14 +278,18 @@ paths:
         name: variant
         required: true
         schema:
-          $ref: '#/definitions/handlers.LanguageTagVariantsRequest'
+          items:
+            $ref: '#/definitions/handlers.LanguageTagVariantsRequest'
+          type: array
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/handlers.LanguageTagVariantsResponse'
+            items:
+              $ref: '#/definitions/handlers.LanguageTagVariantsResponse'
+            type: array
         "400":
           description: Invalid request payload
           schema:
