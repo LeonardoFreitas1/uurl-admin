@@ -283,7 +283,10 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LanguageTagVariantsRequest"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handlers.LanguageTagVariantsRequest"
+                            }
                         }
                     }
                 ],
@@ -291,7 +294,10 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/handlers.LanguageTagVariantsResponse"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handlers.LanguageTagVariantsResponse"
+                            }
                         }
                     },
                     "400": {
