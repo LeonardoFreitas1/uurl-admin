@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/country": {
             "get": {
-                "description": "Retrieves a list of all countries",
+                "description": "Retrieves a list of countries filtered by language IDs",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,7 +27,19 @@ const docTemplate = `{
                 "tags": [
                     "Country"
                 ],
-                "summary": "Get all countries",
+                "summary": "Get filtered countries",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Filter by language IDs",
+                        "name": "language_ids",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -36,6 +48,18 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/handlers.GetAllCountriesResponse"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid language_ids parameter",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get countries",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -439,10 +463,10 @@ const docTemplate = `{
         "handlers.LanguageTagBody": {
             "type": "object",
             "properties": {
-                "iso_code_1": {
+                "iso_639_1": {
                     "type": "string"
                 },
-                "iso_code_2": {
+                "iso_639_2": {
                     "type": "string"
                 },
                 "name": {
@@ -456,10 +480,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "iso_code_1": {
+                "iso_639_1": {
                     "type": "string"
                 },
-                "iso_code_2": {
+                "iso_639_2": {
                     "type": "string"
                 },
                 "name": {
@@ -476,10 +500,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "iso_code_1": {
+                "iso_639_1": {
                     "type": "string"
                 },
-                "iso_code_2": {
+                "iso_639_2": {
                     "type": "string"
                 },
                 "name": {
@@ -492,9 +516,6 @@ const docTemplate = `{
             "properties": {
                 "description": {
                     "type": "string"
-                },
-                "is_iana_language_sub_tag": {
-                    "type": "boolean"
                 },
                 "language_tag_id": {
                     "type": "integer"
@@ -512,9 +533,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
-                },
-                "is_iana_language_sub_tag": {
-                    "type": "boolean"
                 },
                 "language_tag_id": {
                     "type": "integer"

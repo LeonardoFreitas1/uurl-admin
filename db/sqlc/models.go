@@ -20,20 +20,24 @@ type Country struct {
 	UpdatedAt         time.Time      `json:"updated_at"`
 }
 
-type LanguageTag struct {
-	ID       int32  `json:"id"`
-	Name     string `json:"name"`
-	IsoCode1 string `json:"iso_code_1"`
-	IsoCode2 string `json:"iso_code_2"`
+type CountryLanguage struct {
+	CountryID  int32 `json:"country_id"`
+	LanguageID int32 `json:"language_id"`
 }
 
-type LanguageTagVariant struct {
-	ID                      int32          `json:"id"`
-	LanguageTagID           sql.NullInt32  `json:"language_tag_id"`
-	CreatedAt               time.Time      `json:"created_at"`
-	UpdatedAt               time.Time      `json:"updated_at"`
-	VariantTag              string         `json:"variant_tag"`
-	Description             sql.NullString `json:"description"`
-	IsIanaLanguageSubTag    bool           `json:"is_iana_language_sub_tag"`
-	InstancesOnDomainsCount int32          `json:"instances_on_domains_count"`
+type Language struct {
+	ID      int32  `json:"id"`
+	Name    string `json:"name"`
+	Iso6391 string `json:"iso_639_1"`
+	Iso6392 string `json:"iso_639_2"`
+}
+
+type Variant struct {
+	ID          int32          `json:"id"`
+	LanguageID  sql.NullInt32  `json:"language_id"`
+	CountryID   sql.NullInt32  `json:"country_id"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	VariantTag  string         `json:"variant_tag"`
+	Description sql.NullString `json:"description"`
 }

@@ -17,22 +17,22 @@ var queries = sqlc.New(database)
 type LanguageTagGetAllResponse struct {
 	ID            int32  `json:"id"`
 	Name          string `json:"name"`
-	IsoCode1      string `json:"iso_code_1"`
-	IsoCode2      string `json:"iso_code_2"`
+	ISO639_1      string `json:"iso_639_1"`
+	ISO639_2      string `json:"iso_639_2"`
 	VariantsCount int32  `json:"variants_count"`
 }
 
 type LanguageTagResponse struct {
 	ID       int32  `json:"id"`
 	Name     string `json:"name"`
-	IsoCode1 string `json:"iso_code_1"`
-	IsoCode2 string `json:"iso_code_2"`
+	ISO639_1 string `json:"iso_639_1"`
+	ISO639_2 string `json:"iso_639_2"`
 }
 
 type LanguageTagBody struct {
 	Name     string `json:"name"`
-	IsoCode1 string `json:"iso_code_1"`
-	IsoCode2 string `json:"iso_code_2"`
+	ISO639_1 string `json:"iso_639_1"`
+	ISO639_2 string `json:"iso_639_2"`
 }
 
 // LanguageTagHandler godoc
@@ -107,9 +107,9 @@ func getAllLanguageTags(w http.ResponseWriter, r *http.Request) {
 
 		result = append(result, LanguageTagGetAllResponse{
 			ID:            tag.ID,
-			IsoCode1:      tag.IsoCode1,
+			ISO639_1:      tag.Iso6391,
 			Name:          tag.Name,
-			IsoCode2:      tag.IsoCode2,
+			ISO639_2:      tag.Iso6392,
 			VariantsCount: int32(variantCount),
 		})
 	}
@@ -143,8 +143,8 @@ func getLanguageTagByID(w http.ResponseWriter, r *http.Request, id int32) {
 	result := LanguageTagResponse{
 		ID:       tag.ID,
 		Name:     tag.Name,
-		IsoCode1: tag.IsoCode1,
-		IsoCode2: tag.IsoCode2,
+		ISO639_1: tag.Iso6392,
+		ISO639_2: tag.Iso6391,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -175,9 +175,9 @@ func postLanguageTag(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tagParams := sqlc.InsertLanguageTagParams{
-		Name:     input.Name,
-		IsoCode1: input.IsoCode1,
-		IsoCode2: input.IsoCode2,
+		Name:    input.Name,
+		Iso6391: input.ISO639_1,
+		Iso6392: input.ISO639_2,
 	}
 
 	tagID, err := queries.InsertLanguageTag(ctx, tagParams)
@@ -195,8 +195,8 @@ func postLanguageTag(w http.ResponseWriter, r *http.Request) {
 	result := LanguageTagResponse{
 		ID:       tag.ID,
 		Name:     tag.Name,
-		IsoCode1: tag.IsoCode1,
-		IsoCode2: tag.IsoCode2,
+		ISO639_2: tag.Iso6391,
+		ISO639_1: tag.Iso6392,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

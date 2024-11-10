@@ -12,18 +12,16 @@ import (
 )
 
 type LanguageTagVariantsRequest struct {
-	LanguageTagID        int32  `json:"language_tag_id"`
-	VariantTag           string `json:"variant_tag"`
-	Description          string `json:"description"`
-	IsIanaLanguageSubTag bool   `json:"is_iana_language_sub_tag"`
+	LanguageTagID int32  `json:"language_tag_id"`
+	VariantTag    string `json:"variant_tag"`
+	Description   string `json:"description"`
 }
 
 type LanguageTagVariantsResponse struct {
-	ID                   int32  `json:"id"`
-	LanguageTagID        int32  `json:"language_tag_id"`
-	VariantTag           string `json:"variant_tag"`
-	Description          string `json:"description"`
-	IsIanaLanguageSubTag bool   `json:"is_iana_language_sub_tag"`
+	ID            int32  `json:"id"`
+	LanguageTagID int32  `json:"language_tag_id"`
+	VariantTag    string `json:"variant_tag"`
+	Description   string `json:"description"`
 }
 
 type PaginatedVariantsResponse struct {
@@ -113,7 +111,7 @@ func getPaginatedVariants(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var variants []sqlc.LanguageTagVariant
+	var variants []sqlc.Variant
 	if languageTagId == nil {
 		variants, err = queries.GetPaginatedVariantsWithoutFilter(ctx, sqlc.GetPaginatedVariantsWithoutFilterParams{
 			Limit:  int32(pageSize),
@@ -121,9 +119,9 @@ func getPaginatedVariants(w http.ResponseWriter, r *http.Request) {
 		})
 	} else {
 		variants, err = queries.GetPaginatedVariantsWithFilter(ctx, sqlc.GetPaginatedVariantsWithFilterParams{
-			LanguageTagID: *languageTagId,
-			Limit:         int32(pageSize),
-			Offset:        int32(offset),
+			LanguageID: *languageTagId,
+			Limit:      int32(pageSize),
+			Offset:     int32(offset),
 		})
 	}
 
@@ -135,11 +133,10 @@ func getPaginatedVariants(w http.ResponseWriter, r *http.Request) {
 	var response PaginatedVariantsResponse
 	for _, v := range variants {
 		response.Variants = append(response.Variants, LanguageTagVariantsResponse{
-			ID:                   v.ID,
-			LanguageTagID:        v.LanguageTagID.Int32,
-			VariantTag:           v.VariantTag,
-			Description:          v.Description.String,
-			IsIanaLanguageSubTag: v.IsIanaLanguageSubTag,
+			ID:            v.ID,
+			LanguageTagID: v.LanguageID.Int32,
+			VariantTag:    v.VariantTag,
+			Description:   v.Description.String,
 		})
 	}
 
@@ -173,13 +170,11 @@ func postLanguageTagVariant(w http.ResponseWriter, r *http.Request) {
 	}
 
 	arg := sqlc.InsertVariantParams{
-		LanguageTagID:           sql.NullInt32{Int32: req.LanguageTagID, Valid: true},
-		VariantTag:              req.VariantTag,
-		Description:             sql.NullString{String: req.Description, Valid: true},
-		IsIanaLanguageSubTag:    req.IsIanaLanguageSubTag,
-		InstancesOnDomainsCount: 0,
-		CreatedAt:               time.Now(),
-		UpdatedAt:               time.Now(),
+		LanguageID:  sql.NullInt32{Int32: req.LanguageTagID, Valid: true},
+		VariantTag:  req.VariantTag,
+		Description: sql.NullString{String: req.Description, Valid: true},
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
 	err := queries.InsertVariant(r.Context(), arg)
@@ -190,10 +185,9 @@ func postLanguageTagVariant(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := LanguageTagVariantsResponse{
-		LanguageTagID:        req.LanguageTagID,
-		VariantTag:           req.VariantTag,
-		Description:          req.Description,
-		IsIanaLanguageSubTag: req.IsIanaLanguageSubTag,
+		LanguageTagID: req.LanguageTagID,
+		VariantTag:    req.VariantTag,
+		Description:   req.Description,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -225,12 +219,11 @@ func updateLanguageTagVariant(w http.ResponseWriter, r *http.Request, LanguageTa
 	}
 
 	arg := sqlc.UpdateVariantParams{
-		ID:                   int32(LanguageTagVariantId),
-		LanguageTagID:        sql.NullInt32{Int32: req.LanguageTagID, Valid: true},
-		VariantTag:           req.VariantTag,
-		Description:          sql.NullString{String: req.Description, Valid: true},
-		IsIanaLanguageSubTag: req.IsIanaLanguageSubTag,
-		UpdatedAt:            time.Now(),
+		ID:          int32(LanguageTagVariantId),
+		LanguageID:  sql.NullInt32{Int32: req.LanguageTagID, Valid: true},
+		VariantTag:  req.VariantTag,
+		Description: sql.NullString{String: req.Description, Valid: true},
+		UpdatedAt:   time.Now(),
 	}
 
 	err := queries.UpdateVariant(r.Context(), arg)
@@ -241,11 +234,10 @@ func updateLanguageTagVariant(w http.ResponseWriter, r *http.Request, LanguageTa
 	}
 
 	response := LanguageTagVariantsResponse{
-		ID:                   int32(LanguageTagVariantId),
-		LanguageTagID:        req.LanguageTagID,
-		VariantTag:           req.VariantTag,
-		Description:          req.Description,
-		IsIanaLanguageSubTag: req.IsIanaLanguageSubTag,
+		ID:            int32(LanguageTagVariantId),
+		LanguageTagID: req.LanguageTagID,
+		VariantTag:    req.VariantTag,
+		Description:   req.Description,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

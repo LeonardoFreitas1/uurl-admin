@@ -9,6 +9,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 const getAllCountries = `-- name: GetAllCountries :many
@@ -79,6 +81,52 @@ func (q *Queries) GetCountryById(ctx context.Context, id int32) (GetCountryByIdR
 		&i.Iso31662A3,
 	)
 	return i, err
+}
+
+const getFilteredCountry = `-- name: GetFilteredCountry :many
+SELECT DISTINCT ON (ctr.id) id, name, official_state_name, tld, iso3166_2_A1, iso3166_2_A3
+FROM country ctr
+         LEFT JOIN country_language cl ON ctr.id = cl.country_id
+WHERE ($1::int[] IS NULL OR language_id = ANY($1::int[]))
+`
+
+type GetFilteredCountryRow struct {
+	ID                int32          `json:"id"`
+	Name              string         `json:"name"`
+	OfficialStateName sql.NullString `json:"official_state_name"`
+	Tld               string         `json:"tld"`
+	Iso31662A1        string         `json:"iso3166_2_a1"`
+	Iso31662A3        string         `json:"iso3166_2_a3"`
+}
+
+func (q *Queries) GetFilteredCountry(ctx context.Context, dollar_1 []int32) ([]GetFilteredCountryRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFilteredCountry, pq.Array(dollar_1))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetFilteredCountryRow{}
+	for rows.Next() {
+		var i GetFilteredCountryRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.OfficialStateName,
+			&i.Tld,
+			&i.Iso31662A1,
+			&i.Iso31662A3,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const insertCountry = `-- name: InsertCountry :one

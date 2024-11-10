@@ -27,6 +27,10 @@ type InsertCountryRequest struct {
 	Iso31662A3        string `json:"iso3166_2_a3"`
 }
 
+type CountryFilter struct {
+	LanguageIds []int32 `json:"language_ids"`
+}
+
 // CountryHandler handles requests for country-related operations
 // @Summary Country-related operations
 // @Description Handles get, post, and retrieve by ID requests for countries
@@ -45,7 +49,7 @@ func CountryHandler(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 
 		if path == "/country" || path == "/country/" {
-			getAllCountries(w, r)
+			getFilteredCountries(w, r)
 			return
 		}
 
@@ -63,20 +67,41 @@ func CountryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// getAllCountries retrieves all countries
-// @Summary Get all countries
-// @Description Retrieves a list of all countries
-// @tags Country
-// @Accept  json
-// @Produce  json
-// @Success 200  {array}   GetAllCountriesResponse
+// getFilteredCountries retrieves a list of countries filtered by language IDs
+// @Summary Get filtered countries
+// @Description Retrieves a list of countries filtered by language IDs
+// @Tags Country
+// @Accept json
+// @Produce json
+// @Param language_ids query []int false "Filter by language IDs"
+// @Success 200 {array} GetAllCountriesResponse
+// @Failure 400 {string} string "Invalid language_ids parameter"
+// @Failure 500 {string} string "Failed to get countries"
 // @Router /country [get]
-func getAllCountries(w http.ResponseWriter, r *http.Request) {
+func getFilteredCountries(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	query := r.URL.Query()
 
-	countries, err := queries.GetAllCountries(ctx)
+	languageIdsStr := query["language_ids"]
+
+	var languageIds []int32
+	for _, idStr := range languageIdsStr {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			http.Error(w, "Invalid language_ids parameter", http.StatusBadRequest)
+			return
+		}
+		languageIds = append(languageIds, int32(id))
+	}
+
+	filter := CountryFilter{
+		LanguageIds: languageIds,
+	}
+
+	countries, err := queries.GetFilteredCountry(ctx, filter.LanguageIds)
 	if err != nil {
-		http.Error(w, "Failed to get countrys", http.StatusInternalServerError)
+		println(err.Error())
+		http.Error(w, "Failed to get countries", http.StatusInternalServerError)
 		return
 	}
 
