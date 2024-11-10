@@ -151,14 +151,15 @@ func (q *Queries) GetVariantsByLanguageTagID(ctx context.Context, languageID sql
 }
 
 const insertVariant = `-- name: InsertVariant :exec
-INSERT INTO variant (language_id, variant_tag, description, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO variant (language_id, variant_tag, description, country_id, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6)
 `
 
 type InsertVariantParams struct {
 	LanguageID  sql.NullInt32  `json:"language_id"`
 	VariantTag  string         `json:"variant_tag"`
 	Description sql.NullString `json:"description"`
+	CountryID   sql.NullInt32  `json:"country_id"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 }
@@ -168,6 +169,7 @@ func (q *Queries) InsertVariant(ctx context.Context, arg InsertVariantParams) er
 		arg.LanguageID,
 		arg.VariantTag,
 		arg.Description,
+		arg.CountryID,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)

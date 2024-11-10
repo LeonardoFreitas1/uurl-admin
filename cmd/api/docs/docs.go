@@ -514,10 +514,13 @@ const docTemplate = `{
         "handlers.LanguageTagVariantsRequest": {
             "type": "object",
             "properties": {
+                "country_id": {
+                    "type": "integer"
+                },
                 "description": {
                     "type": "string"
                 },
-                "language_tag_id": {
+                "language_id": {
                     "type": "integer"
                 },
                 "variant_tag": {

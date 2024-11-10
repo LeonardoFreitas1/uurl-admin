@@ -3,8 +3,8 @@ SELECT id, created_at, updated_at, variant_tag, description
 FROM variant WHERE language_id = $1;
 
 -- name: InsertVariant :exec
-INSERT INTO variant (language_id, variant_tag, description, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5);
+INSERT INTO variant (language_id, variant_tag, description, country_id, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6);
 
 -- name: UpdateVariant :exec
 UPDATE variant set language_id = $2, variant_tag = $3, description = $4, updated_at = $5 where id = $1;

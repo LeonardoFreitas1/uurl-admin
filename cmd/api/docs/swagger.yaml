@@ -63,9 +63,11 @@ definitions:
     type: object
   handlers.LanguageTagVariantsRequest:
     properties:
+      country_id:
+        type: integer
       description:
         type: string
-      language_tag_id:
+      language_id:
         type: integer
       variant_tag:
         type: string

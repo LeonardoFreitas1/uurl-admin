@@ -12,7 +12,8 @@ import (
 )
 
 type LanguageTagVariantsRequest struct {
-	LanguageTagID int32  `json:"language_tag_id"`
+	LanguageTagID int32  `json:"language_id"`
+	CountryID     int32  `json:"country_id"`
 	VariantTag    string `json:"variant_tag"`
 	Description   string `json:"description"`
 }
@@ -163,7 +164,7 @@ func getPaginatedVariants(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500		{string}	string	"Database query error"
 //	@Router			/language-variant [post]
 func postLanguageTagVariant(w http.ResponseWriter, r *http.Request) {
-	var req LanguageTagVariantsResponse
+	var req LanguageTagVariantsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
@@ -171,6 +172,7 @@ func postLanguageTagVariant(w http.ResponseWriter, r *http.Request) {
 
 	arg := sqlc.InsertVariantParams{
 		LanguageID:  sql.NullInt32{Int32: req.LanguageTagID, Valid: true},
+		CountryID:   sql.NullInt32{Int32: req.CountryID, Valid: true},
 		VariantTag:  req.VariantTag,
 		Description: sql.NullString{String: req.Description, Valid: true},
 		CreatedAt:   time.Now(),
