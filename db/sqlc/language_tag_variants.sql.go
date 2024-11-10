@@ -12,36 +12,35 @@ import (
 )
 
 const getPaginatedVariantsWithFilter = `-- name: GetPaginatedVariantsWithFilter :many
-SELECT id, language_tag_id, created_at, updated_at, variant_tag, description, is_iana_language_sub_tag, instances_on_domains_count FROM language_tag_variants
-WHERE language_tag_id = $3::integer
+SELECT id, language_id, country_id, created_at, updated_at, variant_tag, description FROM variant
+WHERE language_id = $3::integer
 ORDER BY id
 LIMIT $1 OFFSET $2
 `
 
 type GetPaginatedVariantsWithFilterParams struct {
-	Limit         int32 `json:"limit"`
-	Offset        int32 `json:"offset"`
-	LanguageTagID int32 `json:"language_tag_id"`
+	Limit      int32 `json:"limit"`
+	Offset     int32 `json:"offset"`
+	LanguageID int32 `json:"language_id"`
 }
 
-func (q *Queries) GetPaginatedVariantsWithFilter(ctx context.Context, arg GetPaginatedVariantsWithFilterParams) ([]LanguageTagVariant, error) {
-	rows, err := q.db.QueryContext(ctx, getPaginatedVariantsWithFilter, arg.Limit, arg.Offset, arg.LanguageTagID)
+func (q *Queries) GetPaginatedVariantsWithFilter(ctx context.Context, arg GetPaginatedVariantsWithFilterParams) ([]Variant, error) {
+	rows, err := q.db.QueryContext(ctx, getPaginatedVariantsWithFilter, arg.Limit, arg.Offset, arg.LanguageID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []LanguageTagVariant{}
+	items := []Variant{}
 	for rows.Next() {
-		var i LanguageTagVariant
+		var i Variant
 		if err := rows.Scan(
 			&i.ID,
-			&i.LanguageTagID,
+			&i.LanguageID,
+			&i.CountryID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.VariantTag,
 			&i.Description,
-			&i.IsIanaLanguageSubTag,
-			&i.InstancesOnDomainsCount,
 		); err != nil {
 			return nil, err
 		}
@@ -57,7 +56,7 @@ func (q *Queries) GetPaginatedVariantsWithFilter(ctx context.Context, arg GetPag
 }
 
 const getPaginatedVariantsWithoutFilter = `-- name: GetPaginatedVariantsWithoutFilter :many
-SELECT id, language_tag_id, created_at, updated_at, variant_tag, description, is_iana_language_sub_tag, instances_on_domains_count FROM language_tag_variants
+SELECT id, language_id, country_id, created_at, updated_at, variant_tag, description FROM variant
 ORDER BY id
 LIMIT $1 OFFSET $2
 `
@@ -67,24 +66,23 @@ type GetPaginatedVariantsWithoutFilterParams struct {
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) GetPaginatedVariantsWithoutFilter(ctx context.Context, arg GetPaginatedVariantsWithoutFilterParams) ([]LanguageTagVariant, error) {
+func (q *Queries) GetPaginatedVariantsWithoutFilter(ctx context.Context, arg GetPaginatedVariantsWithoutFilterParams) ([]Variant, error) {
 	rows, err := q.db.QueryContext(ctx, getPaginatedVariantsWithoutFilter, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []LanguageTagVariant{}
+	items := []Variant{}
 	for rows.Next() {
-		var i LanguageTagVariant
+		var i Variant
 		if err := rows.Scan(
 			&i.ID,
-			&i.LanguageTagID,
+			&i.LanguageID,
+			&i.CountryID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.VariantTag,
 			&i.Description,
-			&i.IsIanaLanguageSubTag,
-			&i.InstancesOnDomainsCount,
 		); err != nil {
 			return nil, err
 		}
@@ -100,33 +98,31 @@ func (q *Queries) GetPaginatedVariantsWithoutFilter(ctx context.Context, arg Get
 }
 
 const getVariantCount = `-- name: GetVariantCount :one
-SELECT count(id) FROM language_tag_variants WHERE language_tag_id = $1
+SELECT count(id) FROM variant WHERE language_id = $1
 `
 
-func (q *Queries) GetVariantCount(ctx context.Context, languageTagID sql.NullInt32) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getVariantCount, languageTagID)
+func (q *Queries) GetVariantCount(ctx context.Context, languageID sql.NullInt32) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getVariantCount, languageID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
 const getVariantsByLanguageTagID = `-- name: GetVariantsByLanguageTagID :many
-SELECT id, created_at, updated_at, variant_tag, description, is_iana_language_sub_tag, instances_on_domains_count
-FROM language_tag_variants WHERE language_tag_id = $1
+SELECT id, created_at, updated_at, variant_tag, description
+FROM variant WHERE language_id = $1
 `
 
 type GetVariantsByLanguageTagIDRow struct {
-	ID                      int32          `json:"id"`
-	CreatedAt               time.Time      `json:"created_at"`
-	UpdatedAt               time.Time      `json:"updated_at"`
-	VariantTag              string         `json:"variant_tag"`
-	Description             sql.NullString `json:"description"`
-	IsIanaLanguageSubTag    bool           `json:"is_iana_language_sub_tag"`
-	InstancesOnDomainsCount int32          `json:"instances_on_domains_count"`
+	ID          int32          `json:"id"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	VariantTag  string         `json:"variant_tag"`
+	Description sql.NullString `json:"description"`
 }
 
-func (q *Queries) GetVariantsByLanguageTagID(ctx context.Context, languageTagID sql.NullInt32) ([]GetVariantsByLanguageTagIDRow, error) {
-	rows, err := q.db.QueryContext(ctx, getVariantsByLanguageTagID, languageTagID)
+func (q *Queries) GetVariantsByLanguageTagID(ctx context.Context, languageID sql.NullInt32) ([]GetVariantsByLanguageTagIDRow, error) {
+	rows, err := q.db.QueryContext(ctx, getVariantsByLanguageTagID, languageID)
 	if err != nil {
 		return nil, err
 	}
@@ -140,8 +136,6 @@ func (q *Queries) GetVariantsByLanguageTagID(ctx context.Context, languageTagID 
 			&i.UpdatedAt,
 			&i.VariantTag,
 			&i.Description,
-			&i.IsIanaLanguageSubTag,
-			&i.InstancesOnDomainsCount,
 		); err != nil {
 			return nil, err
 		}
@@ -157,27 +151,25 @@ func (q *Queries) GetVariantsByLanguageTagID(ctx context.Context, languageTagID 
 }
 
 const insertVariant = `-- name: InsertVariant :exec
-INSERT INTO language_tag_variants (language_tag_id, variant_tag, description, is_iana_language_sub_tag, instances_on_domains_count, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
+INSERT INTO variant (language_id, variant_tag, description, country_id, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6)
 `
 
 type InsertVariantParams struct {
-	LanguageTagID           sql.NullInt32  `json:"language_tag_id"`
-	VariantTag              string         `json:"variant_tag"`
-	Description             sql.NullString `json:"description"`
-	IsIanaLanguageSubTag    bool           `json:"is_iana_language_sub_tag"`
-	InstancesOnDomainsCount int32          `json:"instances_on_domains_count"`
-	CreatedAt               time.Time      `json:"created_at"`
-	UpdatedAt               time.Time      `json:"updated_at"`
+	LanguageID  sql.NullInt32  `json:"language_id"`
+	VariantTag  string         `json:"variant_tag"`
+	Description sql.NullString `json:"description"`
+	CountryID   sql.NullInt32  `json:"country_id"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
 }
 
 func (q *Queries) InsertVariant(ctx context.Context, arg InsertVariantParams) error {
 	_, err := q.db.ExecContext(ctx, insertVariant,
-		arg.LanguageTagID,
+		arg.LanguageID,
 		arg.VariantTag,
 		arg.Description,
-		arg.IsIanaLanguageSubTag,
-		arg.InstancesOnDomainsCount,
+		arg.CountryID,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
@@ -185,25 +177,23 @@ func (q *Queries) InsertVariant(ctx context.Context, arg InsertVariantParams) er
 }
 
 const updateVariant = `-- name: UpdateVariant :exec
-UPDATE language_tag_variants set language_tag_id = $2, variant_tag = $3, description = $4, is_iana_language_sub_tag = $5, updated_at = $6 where id = $1
+UPDATE variant set language_id = $2, variant_tag = $3, description = $4, updated_at = $5 where id = $1
 `
 
 type UpdateVariantParams struct {
-	ID                   int32          `json:"id"`
-	LanguageTagID        sql.NullInt32  `json:"language_tag_id"`
-	VariantTag           string         `json:"variant_tag"`
-	Description          sql.NullString `json:"description"`
-	IsIanaLanguageSubTag bool           `json:"is_iana_language_sub_tag"`
-	UpdatedAt            time.Time      `json:"updated_at"`
+	ID          int32          `json:"id"`
+	LanguageID  sql.NullInt32  `json:"language_id"`
+	VariantTag  string         `json:"variant_tag"`
+	Description sql.NullString `json:"description"`
+	UpdatedAt   time.Time      `json:"updated_at"`
 }
 
 func (q *Queries) UpdateVariant(ctx context.Context, arg UpdateVariantParams) error {
 	_, err := q.db.ExecContext(ctx, updateVariant,
 		arg.ID,
-		arg.LanguageTagID,
+		arg.LanguageID,
 		arg.VariantTag,
 		arg.Description,
-		arg.IsIanaLanguageSubTag,
 		arg.UpdatedAt,
 	)
 	return err

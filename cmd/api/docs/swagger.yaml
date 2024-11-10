@@ -1,10 +1,38 @@
 basePath: /
 definitions:
+  handlers.GetAllCountriesResponse:
+    properties:
+      id:
+        type: integer
+      iso3166_2_a1:
+        type: string
+      iso3166_2_a3:
+        type: string
+      name:
+        type: string
+      official_state_name:
+        type: string
+      tld:
+        type: string
+    type: object
+  handlers.InsertCountryRequest:
+    properties:
+      iso3166_2_a1:
+        type: string
+      iso3166_2_a3:
+        type: string
+      name:
+        type: string
+      official_state_name:
+        type: string
+      tld:
+        type: string
+    type: object
   handlers.LanguageTagBody:
     properties:
-      iso_code_1:
+      iso_639_1:
         type: string
-      iso_code_2:
+      iso_639_2:
         type: string
       name:
         type: string
@@ -13,9 +41,9 @@ definitions:
     properties:
       id:
         type: integer
-      iso_code_1:
+      iso_639_1:
         type: string
-      iso_code_2:
+      iso_639_2:
         type: string
       name:
         type: string
@@ -26,20 +54,20 @@ definitions:
     properties:
       id:
         type: integer
-      iso_code_1:
+      iso_639_1:
         type: string
-      iso_code_2:
+      iso_639_2:
         type: string
       name:
         type: string
     type: object
   handlers.LanguageTagVariantsRequest:
     properties:
+      country_id:
+        type: integer
       description:
         type: string
-      is_iana_language_sub_tag:
-        type: boolean
-      language_tag_id:
+      language_id:
         type: integer
       variant_tag:
         type: string
@@ -50,8 +78,6 @@ definitions:
         type: string
       id:
         type: integer
-      is_iana_language_sub_tag:
-        type: boolean
       language_tag_id:
         type: integer
       variant_tag:
@@ -73,6 +99,89 @@ info:
   title: UURL Admin API
   version: "1.0"
 paths:
+  /country:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of countries filtered by language IDs
+      parameters:
+      - collectionFormat: csv
+        description: Filter by language IDs
+        in: query
+        items:
+          type: integer
+        name: language_ids
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.GetAllCountriesResponse'
+            type: array
+        "400":
+          description: Invalid language_ids parameter
+          schema:
+            type: string
+        "500":
+          description: Failed to get countries
+          schema:
+            type: string
+      summary: Get filtered countries
+      tags:
+      - Country
+    post:
+      consumes:
+      - application/json
+      description: Creates a new country with the provided information
+      parameters:
+      - description: Country Data
+        in: body
+        name: country
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.InsertCountryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.GetAllCountriesResponse'
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+      summary: Create a new country
+      tags:
+      - Country
+  /country/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a country by the provided ID
+      parameters:
+      - description: Country ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.GetAllCountriesResponse'
+        "400":
+          description: Invalid item ID
+          schema:
+            type: string
+      summary: Get country by ID
+      tags:
+      - Country
   /language:
     get:
       description: Retrieve all language tags with their associated variants
@@ -91,7 +200,7 @@ paths:
             type: string
       summary: Get all language tags
       tags:
-      - LanguageTags
+      - Language tags
     post:
       consumes:
       - application/json
@@ -120,7 +229,7 @@ paths:
             type: string
       summary: Create a new language tag
       tags:
-      - LanguageTags
+      - Language tags
   /language-variant:
     get:
       consumes:
@@ -158,7 +267,7 @@ paths:
             type: string
       summary: Get paginated language tag variants
       tags:
-      - language-variant
+      - Language variants
     post:
       consumes:
       - application/json
@@ -187,7 +296,7 @@ paths:
             type: string
       summary: Create a new language tag variant
       tags:
-      - language-variant
+      - Language variants
   /language-variant/{id}:
     put:
       consumes:
@@ -226,7 +335,7 @@ paths:
             type: string
       summary: Update an existing language tag variant
       tags:
-      - language-variant
+      - Language variants
   /language/{id}:
     get:
       description: Retrieve a specific language tag and its variants by ID
@@ -253,5 +362,5 @@ paths:
             type: string
       summary: Get language tag by ID
       tags:
-      - LanguageTags
+      - Language tags
 swagger: "2.0"

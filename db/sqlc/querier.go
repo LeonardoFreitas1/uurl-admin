@@ -10,12 +10,16 @@ import (
 )
 
 type Querier interface {
-	GetAllLanguageTags(ctx context.Context) ([]LanguageTag, error)
-	GetLanguageTagByID(ctx context.Context, id int32) (LanguageTag, error)
-	GetPaginatedVariantsWithFilter(ctx context.Context, arg GetPaginatedVariantsWithFilterParams) ([]LanguageTagVariant, error)
-	GetPaginatedVariantsWithoutFilter(ctx context.Context, arg GetPaginatedVariantsWithoutFilterParams) ([]LanguageTagVariant, error)
-	GetVariantCount(ctx context.Context, languageTagID sql.NullInt32) (int64, error)
-	GetVariantsByLanguageTagID(ctx context.Context, languageTagID sql.NullInt32) ([]GetVariantsByLanguageTagIDRow, error)
+	GetAllCountries(ctx context.Context) ([]GetAllCountriesRow, error)
+	GetAllLanguageTags(ctx context.Context) ([]Language, error)
+	GetCountryById(ctx context.Context, id int32) (GetCountryByIdRow, error)
+	GetFilteredCountry(ctx context.Context, dollar_1 []int32) ([]GetFilteredCountryRow, error)
+	GetLanguageTagByID(ctx context.Context, id int32) (Language, error)
+	GetPaginatedVariantsWithFilter(ctx context.Context, arg GetPaginatedVariantsWithFilterParams) ([]Variant, error)
+	GetPaginatedVariantsWithoutFilter(ctx context.Context, arg GetPaginatedVariantsWithoutFilterParams) ([]Variant, error)
+	GetVariantCount(ctx context.Context, languageID sql.NullInt32) (int64, error)
+	GetVariantsByLanguageTagID(ctx context.Context, languageID sql.NullInt32) ([]GetVariantsByLanguageTagIDRow, error)
+	InsertCountry(ctx context.Context, arg InsertCountryParams) (int32, error)
 	InsertLanguageTag(ctx context.Context, arg InsertLanguageTagParams) (int32, error)
 	InsertVariant(ctx context.Context, arg InsertVariantParams) error
 	UpdateVariant(ctx context.Context, arg UpdateVariantParams) error

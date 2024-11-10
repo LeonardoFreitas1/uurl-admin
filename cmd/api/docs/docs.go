@@ -15,6 +15,132 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/country": {
+            "get": {
+                "description": "Retrieves a list of countries filtered by language IDs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Country"
+                ],
+                "summary": "Get filtered countries",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Filter by language IDs",
+                        "name": "language_ids",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handlers.GetAllCountriesResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid language_ids parameter",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get countries",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new country with the provided information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Country"
+                ],
+                "summary": "Create a new country",
+                "parameters": [
+                    {
+                        "description": "Country Data",
+                        "name": "country",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.InsertCountryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.GetAllCountriesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/country/{id}": {
+            "get": {
+                "description": "Retrieves a country by the provided ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Country"
+                ],
+                "summary": "Get country by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Country ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.GetAllCountriesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid item ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/language": {
             "get": {
                 "description": "Retrieve all language tags with their associated variants",
@@ -22,7 +148,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "LanguageTags"
+                    "Language tags"
                 ],
                 "summary": "Get all language tags",
                 "responses": {
@@ -52,7 +178,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "LanguageTags"
+                    "Language tags"
                 ],
                 "summary": "Create a new language tag",
                 "parameters": [
@@ -98,7 +224,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "language-variant"
+                    "Language variants"
                 ],
                 "summary": "Get paginated language tag variants",
                 "parameters": [
@@ -153,7 +279,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "language-variant"
+                    "Language variants"
                 ],
                 "summary": "Create a new language tag variant",
                 "parameters": [
@@ -199,7 +325,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "language-variant"
+                    "Language variants"
                 ],
                 "summary": "Update an existing language tag variant",
                 "parameters": [
@@ -255,7 +381,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "LanguageTags"
+                    "Language tags"
                 ],
                 "summary": "Get language tag by ID",
                 "parameters": [
@@ -291,13 +417,56 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.GetAllCountriesResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "iso3166_2_a1": {
+                    "type": "string"
+                },
+                "iso3166_2_a3": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "official_state_name": {
+                    "type": "string"
+                },
+                "tld": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.InsertCountryRequest": {
+            "type": "object",
+            "properties": {
+                "iso3166_2_a1": {
+                    "type": "string"
+                },
+                "iso3166_2_a3": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "official_state_name": {
+                    "type": "string"
+                },
+                "tld": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.LanguageTagBody": {
             "type": "object",
             "properties": {
-                "iso_code_1": {
+                "iso_639_1": {
                     "type": "string"
                 },
-                "iso_code_2": {
+                "iso_639_2": {
                     "type": "string"
                 },
                 "name": {
@@ -311,10 +480,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "iso_code_1": {
+                "iso_639_1": {
                     "type": "string"
                 },
-                "iso_code_2": {
+                "iso_639_2": {
                     "type": "string"
                 },
                 "name": {
@@ -331,10 +500,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "iso_code_1": {
+                "iso_639_1": {
                     "type": "string"
                 },
-                "iso_code_2": {
+                "iso_639_2": {
                     "type": "string"
                 },
                 "name": {
@@ -345,13 +514,13 @@ const docTemplate = `{
         "handlers.LanguageTagVariantsRequest": {
             "type": "object",
             "properties": {
+                "country_id": {
+                    "type": "integer"
+                },
                 "description": {
                     "type": "string"
                 },
-                "is_iana_language_sub_tag": {
-                    "type": "boolean"
-                },
-                "language_tag_id": {
+                "language_id": {
                     "type": "integer"
                 },
                 "variant_tag": {
@@ -367,9 +536,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
-                },
-                "is_iana_language_sub_tag": {
-                    "type": "boolean"
                 },
                 "language_tag_id": {
                     "type": "integer"

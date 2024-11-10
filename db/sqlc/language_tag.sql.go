@@ -10,23 +10,23 @@ import (
 )
 
 const getAllLanguageTags = `-- name: GetAllLanguageTags :many
-SELECT id, name, iso_code_1, iso_code_2 FROM language_tags
+SELECT id, name, iso_639_1, iso_639_2 FROM language
 `
 
-func (q *Queries) GetAllLanguageTags(ctx context.Context) ([]LanguageTag, error) {
+func (q *Queries) GetAllLanguageTags(ctx context.Context) ([]Language, error) {
 	rows, err := q.db.QueryContext(ctx, getAllLanguageTags)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []LanguageTag{}
+	items := []Language{}
 	for rows.Next() {
-		var i LanguageTag
+		var i Language
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
-			&i.IsoCode1,
-			&i.IsoCode2,
+			&i.Iso6391,
+			&i.Iso6392,
 		); err != nil {
 			return nil, err
 		}
@@ -42,33 +42,33 @@ func (q *Queries) GetAllLanguageTags(ctx context.Context) ([]LanguageTag, error)
 }
 
 const getLanguageTagByID = `-- name: GetLanguageTagByID :one
-SELECT id, name, iso_code_1, iso_code_2 FROM language_tags WHERE id = $1
+SELECT id, name, iso_639_1, iso_639_2 FROM language WHERE id = $1
 `
 
-func (q *Queries) GetLanguageTagByID(ctx context.Context, id int32) (LanguageTag, error) {
+func (q *Queries) GetLanguageTagByID(ctx context.Context, id int32) (Language, error) {
 	row := q.db.QueryRowContext(ctx, getLanguageTagByID, id)
-	var i LanguageTag
+	var i Language
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.IsoCode1,
-		&i.IsoCode2,
+		&i.Iso6391,
+		&i.Iso6392,
 	)
 	return i, err
 }
 
 const insertLanguageTag = `-- name: InsertLanguageTag :one
-INSERT INTO language_tags (name, iso_code_1, iso_code_2) VALUES ($1, $2, $3) RETURNING id
+INSERT INTO language (name, iso_639_1, iso_639_2) VALUES ($1, $2, $3) RETURNING id
 `
 
 type InsertLanguageTagParams struct {
-	Name     string `json:"name"`
-	IsoCode1 string `json:"iso_code_1"`
-	IsoCode2 string `json:"iso_code_2"`
+	Name    string `json:"name"`
+	Iso6391 string `json:"iso_639_1"`
+	Iso6392 string `json:"iso_639_2"`
 }
 
 func (q *Queries) InsertLanguageTag(ctx context.Context, arg InsertLanguageTagParams) (int32, error) {
-	row := q.db.QueryRowContext(ctx, insertLanguageTag, arg.Name, arg.IsoCode1, arg.IsoCode2)
+	row := q.db.QueryRowContext(ctx, insertLanguageTag, arg.Name, arg.Iso6391, arg.Iso6392)
 	var id int32
 	err := row.Scan(&id)
 	return id, err

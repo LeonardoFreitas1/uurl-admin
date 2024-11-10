@@ -12,18 +12,17 @@ import (
 )
 
 type LanguageTagVariantsRequest struct {
-	LanguageTagID        int32  `json:"language_tag_id"`
-	VariantTag           string `json:"variant_tag"`
-	Description          string `json:"description"`
-	IsIanaLanguageSubTag bool   `json:"is_iana_language_sub_tag"`
+	LanguageTagID int32  `json:"language_id"`
+	CountryID     int32  `json:"country_id"`
+	VariantTag    string `json:"variant_tag"`
+	Description   string `json:"description"`
 }
 
 type LanguageTagVariantsResponse struct {
-	ID                   int32  `json:"id"`
-	LanguageTagID        int32  `json:"language_tag_id"`
-	VariantTag           string `json:"variant_tag"`
-	Description          string `json:"description"`
-	IsIanaLanguageSubTag bool   `json:"is_iana_language_sub_tag"`
+	ID            int32  `json:"id"`
+	LanguageTagID int32  `json:"language_tag_id"`
+	VariantTag    string `json:"variant_tag"`
+	Description   string `json:"description"`
 }
 
 type PaginatedVariantsResponse struct {
@@ -32,15 +31,16 @@ type PaginatedVariantsResponse struct {
 }
 
 // LanguageTagVariantHandler handles requests related to language tag variants
-// @Summary Handles language tag variants
-// @Description Get, create, or update language tag variants
-// @Tags language-variant
-// @Accept json
-// @Produce json
-// @Param id path int false "Variant ID" for PUT request
-// @Success 200 {object} LanguageTagVariantsResponse
-// @Failure 400 {string} string "Invalid request"
-// @Failure 405 {string} string "Method not allowed"
+//
+//	@Summary		Handles language tag variants
+//	@Description	Get, create, or update language tag variants
+//	@tags			Language variants
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int	false	"Variant ID"	for	PUT	request
+//	@Success		200	{object}	LanguageTagVariantsResponse
+//	@Failure		400	{string}	string	"Invalid request"
+//	@Failure		405	{string}	string	"Method not allowed"
 func LanguageTagVariantHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -64,18 +64,19 @@ func LanguageTagVariantHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // getPaginatedVariants returns paginated language tag variants
-// @Summary Get paginated language tag variants
-// @Description Get a list of language tag variants with pagination
-// @Tags language-variant
-// @Accept json
-// @Produce json
-// @Param languageTagId query int false "Language Tag ID"
-// @Param page_size query int false "Limit of items per page" default(10)
-// @Param page_token query int false "Offset for pagination" default(0)
-// @Success 200 {object} PaginatedVariantsResponse
-// @Failure 400 {string} string "Invalid languageTagId or page_token"
-// @Failure 500 {string} string "Database query error"
-// @Router /language-variant [get]
+//
+//	@Summary		Get paginated language tag variants
+//	@Description	Get a list of language tag variants with pagination
+//	@tags			Language variants
+//	@Accept			json
+//	@Produce		json
+//	@Param			languageTagId	query		int	false	"Language Tag ID"
+//	@Param			page_size		query		int	false	"Limit of items per page"	default(10)
+//	@Param			page_token		query		int	false	"Offset for pagination"		default(0)
+//	@Success		200				{object}	PaginatedVariantsResponse
+//	@Failure		400				{string}	string	"Invalid languageTagId or page_token"
+//	@Failure		500				{string}	string	"Database query error"
+//	@Router			/language-variant [get]
 func getPaginatedVariants(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	query := r.URL.Query()
@@ -111,7 +112,7 @@ func getPaginatedVariants(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var variants []sqlc.LanguageTagVariant
+	var variants []sqlc.Variant
 	if languageTagId == nil {
 		variants, err = queries.GetPaginatedVariantsWithoutFilter(ctx, sqlc.GetPaginatedVariantsWithoutFilterParams{
 			Limit:  int32(pageSize),
@@ -119,9 +120,9 @@ func getPaginatedVariants(w http.ResponseWriter, r *http.Request) {
 		})
 	} else {
 		variants, err = queries.GetPaginatedVariantsWithFilter(ctx, sqlc.GetPaginatedVariantsWithFilterParams{
-			LanguageTagID: *languageTagId,
-			Limit:         int32(pageSize),
-			Offset:        int32(offset),
+			LanguageID: *languageTagId,
+			Limit:      int32(pageSize),
+			Offset:     int32(offset),
 		})
 	}
 
@@ -133,11 +134,10 @@ func getPaginatedVariants(w http.ResponseWriter, r *http.Request) {
 	var response PaginatedVariantsResponse
 	for _, v := range variants {
 		response.Variants = append(response.Variants, LanguageTagVariantsResponse{
-			ID:                   v.ID,
-			LanguageTagID:        v.LanguageTagID.Int32,
-			VariantTag:           v.VariantTag,
-			Description:          v.Description.String,
-			IsIanaLanguageSubTag: v.IsIanaLanguageSubTag,
+			ID:            v.ID,
+			LanguageTagID: v.LanguageID.Int32,
+			VariantTag:    v.VariantTag,
+			Description:   v.Description.String,
 		})
 	}
 
@@ -152,31 +152,31 @@ func getPaginatedVariants(w http.ResponseWriter, r *http.Request) {
 }
 
 // postLanguageTagVariant handles creating a new language tag variant
-// @Summary Create a new language tag variant
-// @Description Create a new language tag variant
-// @Tags language-variant
-// @Accept json
-// @Produce json
-// @Param variant body LanguageTagVariantsRequest true "Language Tag Variant"
-// @Success 201 {object} LanguageTagVariantsResponse
-// @Failure 400 {string} string "Invalid request payload"
-// @Failure 500 {string} string "Database query error"
-// @Router /language-variant [post]
+//
+//	@Summary		Create a new language tag variant
+//	@Description	Create a new language tag variant
+//	@tags			Language variants
+//	@Accept			json
+//	@Produce		json
+//	@Param			variant	body		LanguageTagVariantsRequest	true	"Language Tag Variant"
+//	@Success		201		{object}	LanguageTagVariantsResponse
+//	@Failure		400		{string}	string	"Invalid request payload"
+//	@Failure		500		{string}	string	"Database query error"
+//	@Router			/language-variant [post]
 func postLanguageTagVariant(w http.ResponseWriter, r *http.Request) {
-	var req LanguageTagVariantsResponse
+	var req LanguageTagVariantsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
 	arg := sqlc.InsertVariantParams{
-		LanguageTagID:           sql.NullInt32{Int32: req.LanguageTagID, Valid: true},
-		VariantTag:              req.VariantTag,
-		Description:             sql.NullString{String: req.Description, Valid: true},
-		IsIanaLanguageSubTag:    req.IsIanaLanguageSubTag,
-		InstancesOnDomainsCount: 0,
-		CreatedAt:               time.Now(),
-		UpdatedAt:               time.Now(),
+		LanguageID:  sql.NullInt32{Int32: req.LanguageTagID, Valid: true},
+		CountryID:   sql.NullInt32{Int32: req.CountryID, Valid: true},
+		VariantTag:  req.VariantTag,
+		Description: sql.NullString{String: req.Description, Valid: true},
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
 	err := queries.InsertVariant(r.Context(), arg)
@@ -187,10 +187,9 @@ func postLanguageTagVariant(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := LanguageTagVariantsResponse{
-		LanguageTagID:        req.LanguageTagID,
-		VariantTag:           req.VariantTag,
-		Description:          req.Description,
-		IsIanaLanguageSubTag: req.IsIanaLanguageSubTag,
+		LanguageTagID: req.LanguageTagID,
+		VariantTag:    req.VariantTag,
+		Description:   req.Description,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -201,18 +200,19 @@ func postLanguageTagVariant(w http.ResponseWriter, r *http.Request) {
 }
 
 // updateLanguageTagVariant handles updating an existing language tag variant
-// @Summary Update an existing language tag variant
-// @Description Update an existing language tag variant
-// @Tags language-variant
-// @Accept json
-// @Produce json
-// @Param id path int true "Variant ID"
-// @Param variant body LanguageTagVariantsRequest true "Language Tag Variant"
-// @Success 200 {object} LanguageTagVariantsResponse
-// @Failure 400 {string} string "Invalid request payload"
-// @Failure 404 {string} string "Variant not found"
-// @Failure 500 {string} string "Database query error"
-// @Router /language-variant/{id} [put]
+//
+//	@Summary		Update an existing language tag variant
+//	@Description	Update an existing language tag variant
+//	@tags			Language variants
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		int							true	"Variant ID"
+//	@Param			variant	body		LanguageTagVariantsRequest	true	"Language Tag Variant"
+//	@Success		200		{object}	LanguageTagVariantsResponse
+//	@Failure		400		{string}	string	"Invalid request payload"
+//	@Failure		404		{string}	string	"Variant not found"
+//	@Failure		500		{string}	string	"Database query error"
+//	@Router			/language-variant/{id} [put]
 func updateLanguageTagVariant(w http.ResponseWriter, r *http.Request, LanguageTagVariantId int) {
 	var req LanguageTagVariantsResponse
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -221,12 +221,11 @@ func updateLanguageTagVariant(w http.ResponseWriter, r *http.Request, LanguageTa
 	}
 
 	arg := sqlc.UpdateVariantParams{
-		ID:                   int32(LanguageTagVariantId),
-		LanguageTagID:        sql.NullInt32{Int32: req.LanguageTagID, Valid: true},
-		VariantTag:           req.VariantTag,
-		Description:          sql.NullString{String: req.Description, Valid: true},
-		IsIanaLanguageSubTag: req.IsIanaLanguageSubTag,
-		UpdatedAt:            time.Now(),
+		ID:          int32(LanguageTagVariantId),
+		LanguageID:  sql.NullInt32{Int32: req.LanguageTagID, Valid: true},
+		VariantTag:  req.VariantTag,
+		Description: sql.NullString{String: req.Description, Valid: true},
+		UpdatedAt:   time.Now(),
 	}
 
 	err := queries.UpdateVariant(r.Context(), arg)
@@ -237,11 +236,10 @@ func updateLanguageTagVariant(w http.ResponseWriter, r *http.Request, LanguageTa
 	}
 
 	response := LanguageTagVariantsResponse{
-		ID:                   int32(LanguageTagVariantId),
-		LanguageTagID:        req.LanguageTagID,
-		VariantTag:           req.VariantTag,
-		Description:          req.Description,
-		IsIanaLanguageSubTag: req.IsIanaLanguageSubTag,
+		ID:            int32(LanguageTagVariantId),
+		LanguageTagID: req.LanguageTagID,
+		VariantTag:    req.VariantTag,
+		Description:   req.Description,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
